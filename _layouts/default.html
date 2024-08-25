@@ -14,21 +14,22 @@
   </head>
   <body>
     <a id="skip-to-content" href="#content">Skip to the content.</a>
-
-    <header class="page-header" role="banner" style="display: flex;align-items: center;justify-content: flex-start;">
-      <div>
-        <h1 class="project-name">{{ page.title | default: site.title | default: site.github.repository_name }}</h1>
-        <h2 class="project-tagline">{{ page.description | default: site.description | default: site.github.project_tagline }}</h2>
-        {% if site.github.is_project_page %}
-          <a href="{{ site.github.repository_url }}" class="btn">View on GitHub</a>
-        {% endif %}
-        {% if site.show_downloads %}
-          <a href="{{ site.github.zip_url }}" class="btn">Download .zip</a>
-          <a href="{{ site.github.tar_url }}" class="btn">Download .tar.gz</a>
-        {% endif %}
+    <header class="page-header" role="banner" style="display: flex; align-items: center; justify-content: center;">
+      <div style="display: flex; align-items: center;">
         {% if site.profile_image %}
           <img src="{{ site.baseurl }}{{ site.profile_image }}" alt="Profile Picture" style="width: 150px; height: 150px; border-radius: 50%; display: block; margin: 0 auto;"/>
         {% endif %}
+        <div>
+          <h1 class="project-name">{{ page.title | default: site.title | default: site.github.repository_name }}</h1>
+          <h2 class="project-tagline">{{ page.description | default: site.description | default: site.github.project_tagline }}</h2>
+          {% if site.github.is_project_page %}
+            <a href="{{ site.github.repository_url }}" class="btn">View on GitHub</a>
+          {% endif %}
+          {% if site.show_downloads %}
+            <a href="{{ site.github.zip_url }}" class="btn">Download .zip</a>
+            <a href="{{ site.github.tar_url }}" class="btn">Download .tar.gz</a>
+          {% endif %}
+        </div>
       </div>
     </header>
 
