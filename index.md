@@ -2,6 +2,7 @@
 layout: default
 title: Marais Kruger
 ---
+gfgdfgfd
 # About me
 I’m Marais Kruger, a seasoned Big Data Engineer with a decade of experience in data driven design, specializing in designing and optimizing high-performance data pipelines. My work spans database technologies, distributed systems, and cloud architecture, delivering B2B SaaS solutions used by industry giants like Salesforce, Comcast, Netflix and Amazon.
 
