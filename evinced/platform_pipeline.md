@@ -51,4 +51,4 @@ To answer the requirement of having a flexible API, I designed a graphQl engine 
 ## Conclusion
 The use of Clickhouse collapsingMergeTree together with the update streaming solution was the solution picked for this project. Because of the idle ability and scaling ability of clickhouse, we could start with a very small cluster and reduce the startup cost significantly compared to the competitors.
 
-Back to [Home](../index.md)
+Back To [Home](../index.md)
