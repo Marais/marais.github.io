@@ -1,4 +1,4 @@
-# Evinced Deduplication Of Items
+# Deduplication Of Items
 
 ## Requirements
 There was need to deduplicate traffic in the pipeline. It should discard messages being send more than once.
