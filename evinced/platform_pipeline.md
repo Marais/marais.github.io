@@ -38,9 +38,9 @@ The important part of this design is that it is doing streaming updates and not 
 
 ## Replay Ability
 As with any pipeline, you want the ability to replay certain data chunks and reprocess it.
-To solve this, the raw input was saved in parquet, partitioned by tenant and date. 
+To solve this, the raw input was saved in parquet, partitioned by tenant and date.
 
-DIAGRAM
+![My SVG Image](/evinced/platform_replay.svg)
 
 ## Item Deduplication
 Link to different page
