@@ -20,8 +20,8 @@
           <img src="{{ site.baseurl }}{{ site.profile_image }}" alt="Profile Picture" style="width: 150px; height: 150px; border-radius: 50%; display: block; margin: 0 auto;"/>
         {% endif %}
         <div>
-          <h1 class="project-name">{{ page.title | default: site.title | default: site.github.repository_name }}</h1>
-          <h2 class="project-tagline">{{ page.description | default: site.description | default: site.github.project_tagline }}</h2>
+          <h1 class="project-name" style="margin: 0;">>{{ page.title | default: site.title | default: site.github.repository_name }}</h1>
+          <h2 class="project-tagline" style="margin: 0;">>{{ page.description | default: site.description | default: site.github.project_tagline }}</h2>
           {% if site.github.is_project_page %}
             <a href="{{ site.github.repository_url }}" class="btn">View on GitHub</a>
           {% endif %}
