@@ -9,7 +9,9 @@ My passion lies in distributed systems—an area I explore deeply through contin
 
 Beyond my professional endeavors, I’m a recognized contributor in the Apache Pulsar community and enjoy sharing my expertise. In my spare time, you’ll find me on the tennis court, mountain biking, or socializing with friends.
 
-Let’s connect and explore how we can innovate and transform together.
+Let’s connect and explore how we can innovate and transform together:
+- [Platform Data Pipeline](https://www.linkedin.com/in/marais-kruger-a5b94214/)
+- Email: marais.kruger@gmail.com
 # Main Projects
 I have listed a few of the project I encountered in my career. A more detailed explanation can be found in the links provided below.
 ## Evinced: Digital accessibility software
