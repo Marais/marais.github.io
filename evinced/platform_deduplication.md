@@ -58,5 +58,5 @@ But if we need to, we can create a new stateful set with more workers. Then stre
 - Casandra, AeroSpike or any other distributed KVDB: Was an overkill for our needs and more expensive
 - SpeedDb: RocksDB compatible, but requires more memory. Is meant for very low latency requirements
 
-Back to [Evinced Pipeline](./platform_pipeline.md)
-Back to [Home](../index.md)
+Back To [Evinced Pipeline](./platform_pipeline.md)  
+Back To [Home](../index.md)
