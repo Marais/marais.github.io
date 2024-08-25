@@ -11,6 +11,7 @@ Beyond my professional endeavors, I’m a recognized contributor in the Apache P
 
 Let’s connect and explore how we can innovate and transform together.
 # Main Projects
+I have listed a few of the project I encountered in my career. A more detailed explanation can be found in the links provided below.
 ## Evinced: Digital accessibility software
 I am the architect and lead data engineer that designed the following projects:
 - [Platform Data Pipeline](./evinced/platform_pipeline.md): A data pipeline for a scraping system that collects accessibility data for the purpose to check for accessibility compliance. The pipeline is designed to handle huge bursts of traffic and scale up and down according to traffic. The pipeline does complex data transformation to accomplish aggregated data that can be query via graphQL. The pipeline keeps up with a few million messages per minute and can scale up to meet much more for future traffic. The pipeline includes data deduplication, complex grouping of data to name a few. All of this functionality was implemented with low cloud cost.
