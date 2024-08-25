@@ -27,7 +27,7 @@ The choice was between embedded or distributed. Distributed has it use case if y
 ## RocksDB solution
 Here is a diagram of an Embedded solution with RocksDB.
 
-DIAGRAM
+![My SVG Image](/platform_dedup_flow.svg)
 
 Note that the hash algorithm can be manual or part of functionality provided by platforms like Kafka.
 
