@@ -6,7 +6,7 @@ My passion lies in distributed systems—an area I explore deeply through contin
 Beyond my professional endeavors, I’m a recognized contributor in the Apache Pulsar community and enjoy sharing my expertise. In my spare time, you’ll find me on the tennis court, mountain biking, or socializing with friends.
 
 Let’s connect and explore how we can innovate and transform together.
-# Projects
+# Main Projects
 ## Evinced: Digital accessibility software
 I am the architect and lead data engineer that designed the following projects:
 - A data pipeline for a scraping system that collects accessibility data for the purpose to check for accessibility compliance. The pipeline is designed to handle huge bursts of traffic and scale up and down according to traffic. The pipeline does complex data transformation to accomplish aggregated data that can be query via graphQL. The pipeline keeps up with a few million messages per minute and can scale up to meet much more for future traffic. The pipeline includes data deduplication, complex grouping of data to name a few. All of this functionality was implemented with low cloud cost. The details of the design I created is detaile here: XXXX
