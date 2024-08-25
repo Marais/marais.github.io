@@ -57,3 +57,6 @@ But if we need to, we can create a new stateful set with more workers. Then stre
 - Redis: Can also work, but is more expensive. Needs to keep the keys in memory. Recovery more complex with snapshot
 - Casandra, AeroSpike or any other distributed KVDB: Was an overkill for our needs and more expensive
 - SpeedDb: RocksDB compatible, but requires more memory. Is meant for very low latency requirements
+
+Back to [Evinced Pipeline](./platform_pipeline.md)
+Back to [Home](../index.md)
