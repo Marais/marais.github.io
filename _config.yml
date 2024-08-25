@@ -4,3 +4,6 @@ plugins:
 title: Marais Kruger
 description: Big Data Engineer / Architect / Distrubuted Systems Enthusiast
 profile_image: /profile_picture/round_pic_smaller.png
+author:
+  name: "Marais Kruger"
+  avatar: "/profile_picture/round_pic_smaller.png"
