@@ -12,6 +12,7 @@ Beyond my professional endeavors, I’m a recognized contributor in the Apache P
 Let’s connect and explore how we can innovate and transform together:
 - [linkedin](https://www.linkedin.com/in/marais-kruger-a5b94214/)
 - marais.kruger@gmail.com
+
 # Main Projects
 I have listed a few of the project I encountered in my career. A more detailed explanation can be found in the links provided below.
 ## Evinced: Digital accessibility software
