@@ -34,7 +34,7 @@ The important part of this design is that it is doing streaming updates and not 
 ## Ingestion Design
 Every item can be categorized. Because the criteria for categorizing an item can be very complex and expensive to solve on a query, I decided to solve this in the ingestion.
 
-DIAGRAM
+![My SVG Image](/evinced/platform_ingestion.svg)
 
 ## Replay Ability
 As with any pipeline, you want the ability to replay certain data chunks and reprocess it.
