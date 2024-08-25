@@ -1,6 +1,6 @@
-# Evinced Data Pipeline Design
+# Data Pipeline Design
 This was quite an interesting project. 
-Requirements was to receive traffic from various products, including a scraping and service sending huge burst of traffic. Further more there was a need to update huge amount of records where users can categorize items into groups driven from an arbitrary function of fields and also label certain items/records. Further more query Tims must be sub second. The expected traffic is between 1 to 5 billion records a day. The company cloud provider is GCP and preferably had to find a solution that can easily be provided/hosted.
+Requirements was to receive traffic from various products, including a scraping and service sending huge burst of traffic. Further more there was a need to update huge amount of records where users can categorize items into groups driven from an arbitrary function of fields and also label certain items/records. Further more query times must be sub second. The expected traffic is between 1 to 5 billion records a day. The company cloud provider is GCP and preferably had to find a solution that can easily be provided/hosted.
 
 ## Database Selection
 In order solve this, I had to make an extensive research on Database technology. 
