@@ -25,6 +25,11 @@
         <a href="{{ site.github.zip_url }}" class="btn">Download .zip</a>
         <a href="{{ site.github.tar_url }}" class="btn">Download .tar.gz</a>
       {% endif %}
+      {% if site.profile_image %}
+        <div class="profile-picture">
+          <img src="{{ site.baseurl }}{{ site.profile_image }}" alt="Profile Picture" />
+        </div>
+      {% endif %}
     </header>
 
     <main id="content" class="main-content" role="main">
