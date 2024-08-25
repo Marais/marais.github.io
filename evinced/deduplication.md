@@ -1,7 +1,7 @@
 # Evinced Deduplication Of Items
 
 ## Requirements
-There is a need to deduplicate traffic into the platform. It should discard messages being send more than once. The uniqueness is open on how you define it per issue or page.
+There was need to deduplicate traffic in the pipeline. It should discard messages being send more than once.
 
 ## Performance requirements:
 - Need to write fast, we receive a lot of new unique message
@@ -11,7 +11,7 @@ There is a need to deduplicate traffic into the platform. It should discard mess
 ## Overview
 Each item needs to have fields that defines its uniqueness. These fields should produce a hash. An item is immutable. From now on, we call this hash the “uniqueness” of the item.
 
-The choice was between embedded or distributed. Distributed has it use case if you need a centralised access from different services. Here we want the data for the sole purpose of deduplicating inbound traffic, therefore embedded seems more suited.
+The choice was between embedded or distributed. Distributed has it use case if you need a centralised access from different services. Here we want the data for the sole purpose of deduplicating inbound traffic, therefore embedded seemed more suited.
 
 ## Embedded benefits
 
