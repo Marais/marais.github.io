@@ -43,7 +43,7 @@ To solve this, the raw input was saved in parquet, partitioned by tenant and dat
 ![My SVG Image](/evinced/platform_replay.svg)
 
 ## Item Deduplication
-Item deduplication was added. Details can be seen on this page: ![Evinced Deduplication](/evinced/deduplication.md)
+Item deduplication was added. Details can be seen on this page: [Deduplication Of Items](./evinced/platform_pipeline.md):
 
 ## Query API Design
 To answer the requirement of having a flexible API, I designed a graphQl engine that translate to a clickhouse query. All complex query needs is hidden behind a view and the graphQL simply reflects the view fields with filtering/sorting/aggreagtion abilities on the fields. This means we simply need to create a new view if another API is needed!
