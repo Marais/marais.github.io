@@ -2,7 +2,7 @@
 layout: default
 title: Marais Krüger
 ---
-# ![profile_pic](/profile_picture/round_pic_smaller.png) About Me
+# About Me
 I’m a seasoned Big Data Engineer with a decade of experience in data driven design, specializing in designing and optimizing high-performance data pipelines. My work spans database technologies, distributed systems, and cloud architecture, delivering B2B SaaS solutions used by industry giants like Salesforce, Comcast, Netflix and Amazon.
 
 My passion lies in distributed systems—an area I explore deeply through continuous learning. I actively pursue advanced knowledge through online courses, including MIT's Distributed Systems, staying at the forefront of technological advancements.
