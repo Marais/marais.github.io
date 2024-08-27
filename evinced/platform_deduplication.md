@@ -1,17 +1,17 @@
 # Deduplication Of Items
 
 ## Requirements
-There was need to deduplicate traffic in the pipeline. It should discard messages being send more than once.
+There was a need to deduplicate traffic in the pipeline to ensure that messages sent more than once are discarded.
 
-## Performance requirements:
+## Performance requirements
 - Need to write fast, we receive a lot of new unique message
 - Need to read fast per message, each message needs to be check if it was received at an earlier stage
 - Need to delete keys based on a time window or predefined size
 
 ## Overview
-Each item needs to have fields that defines its uniqueness. These fields should produce a hash. An item is immutable. From now on, we call this hash the “uniqueness” of the item.
+Each item must have fields that define its uniqueness, which should generate a hash. This hash will represent the item's "uniqueness," and the item itself is immutable.
 
-The choice was between embedded or distributed. Distributed has it use case if you need a centralised access from different services. Here we want the data for the sole purpose of deduplicating inbound traffic, therefore embedded seemed more suited.
+The choice was between an embedded or distributed approach. A distributed solution is useful when centralized access from different services is required. However, since the data in this case is solely for deduplicating inbound traffic, an embedded approach seemed more suitable.
 
 ## Embedded benefits
 
@@ -35,9 +35,9 @@ Note that the hash algorithm can be manual or part of functionality provided by 
 ![My SVG Image](/evinced/platform_rocksdb_flow.svg)
 ## The deduplication worker
 ### Message Deduplication flow
-RocksDb was configured with a bloom filter on the keys. Because we had a read heavy need, the filter reduced disk reads when we do lookups if the key exists. On top of this we did a multiget which futher improves performance.
+RocksDB was configured with a Bloom filter on the keys. Since we had a read-heavy requirement, the filter reduced disk reads during lookups by quickly determining if a key exists. Additionally, we implemented a multiget, which further improved performance.
 
-The writes was done in batches to improve performance. In the case of RocksDB, it utilizes a LSM tree with write ahead log. This make writing very fast.
+The writes were done in batches to enhance performance. In the case of RocksDB, it utilizes an LSM tree along with a write-ahead log, which makes the writing process very fast.
 
 The following diagram depicts what is going on in a single deduplication worker process:
 ![My SVG Image](/evinced/platform_dedup_worker_flow.svg)
