@@ -44,9 +44,9 @@ As with any pipeline, it's important to have the ability to replay specific data
 Item deduplication was added. Details can be seen on this page: [Deduplication Of Items](./platform_deduplication.md)
 
 ## Query API Design
-To answer the requirement of having a flexible API, I designed a graphQl engine that translate to a clickhouse query. All complex query needs is hidden behind a view and the graphQL simply reflects the view fields with filtering/sorting/aggreagtion abilities on the fields. This means we simply need to create a new view if another API is needed!
+To meet the requirement for a flexible API, I designed a GraphQL engine that translates queries into ClickHouse queries. All complex query logic is encapsulated within ClickHouse views, and the GraphQL layer simply reflects the view fields, providing filtering, sorting, and aggregation capabilities on those fields. This design allows us to easily create a new view whenever a new API is needed!
 
 ## Conclusion
-The use of Clickhouse collapsingMergeTree together with the update streaming solution was the solution picked for this project. Because of the idle ability and scaling ability of clickhouse, we could start with a very small cluster and reduce the startup cost significantly compared to the competitors.
+The solution chosen for this project was to use ClickHouse's CollapsingMergeTree in combination with the update streaming solution. Thanks to ClickHouse's idling capabilities and scalability, we were able to start with a very small cluster, significantly reducing startup costs compared to competitors.
 
 Back To [Home](../index.md)
