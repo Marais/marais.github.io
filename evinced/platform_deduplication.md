@@ -43,15 +43,15 @@ The following diagram depicts what is going on in a single deduplication worker 
 ![My SVG Image](/evinced/platform_dedup_worker_flow.svg)
  
 ## Key design
-The key was prefixed with a tenant Id. This gave more locality to the data and help the bloom filters be more efficient. On top of this, there is the option to add a prefix bloom filter for iterators.
+The key was prefixed with a tenant ID, which provided better data locality and made the Bloom filters more efficient. Additionally, there is an option to add a prefix Bloom filter for iterators, further enhancing performance.
 
 ### Removing old keys
-Kyes was configured with a TTL
+Kyes was configured with a TTL.
 
 ## Rebalancing
-If we get to a state that the DB on each partition gets to big, we will need to rebalance. This is not something that happened yet or will in near future because I planned the expected traffic by picking enough partitions. 
+If the database on each partition grows too large, we will need to rebalance. However, this isn't something that has happened yet or is expected to happen in the near future because I accounted for the expected traffic by selecting a sufficient number of partitions.
 
-But if we need to, we can create a new stateful set with more workers. Then stream all the data from a specific time to these workers to build its state.
+If rebalancing becomes necessary, we can create a new stateful set with additional workers. We would then stream all the data from a specific point in time to these new workers to build their state.
 
 The following daigram depicts this process:
 ![My SVG Image](/evinced/platform_dedup_rebalance_flow.svg)
