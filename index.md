@@ -18,7 +18,7 @@ I have highlighted only a few of the projects I've encountered in my career, but
 ## Evinced: Digital accessibility software
 I am the architect and lead data engineer that designed the following projects:
 - [Platform Data Pipeline](./evinced/platform_pipeline.md): This data pipeline is part of a scraping system designed to collect accessibility data for compliance checks. It is built to handle significant traffic surges and can scale dynamically according to demand. The pipeline performs complex data transformations, resulting in aggregated data that can be queried via GraphQL. It processes millions of messages per minute and is capable of scaling to handle even greater traffic in the future. Key features include [data deduplication](./evinced/platform_deduplication.md) and complex data grouping, all implemented with a focus on minimizing cloud costs.
-- Designed the new pipeline via Airflow for the company's research team to use for machine learning.
+- I designed a new pipeline using Airflow for the company's research team, specifically tailored for machine learning tasks. This pipeline was challenging as it required spawning separate workers to scrape thousands of URLs simultaneously. The data was materialized into BigQuery, meeting all the research team’s query requirements. Special care was taken to enforce filters on the partition fields to reduce query costs.
 - Researched and designed the pipeline for generative AI needs.
 
 ## Cynet Security: All-in-One Cybersecurity Platform 
