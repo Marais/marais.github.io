@@ -17,7 +17,8 @@ Let’s connect and explore how we can innovate and transform together:
 I have highlighted only a few of the projects I've encountered in my career, but I believe these are particularly significant in showcasing my experience as a Data Engineer:
 ## Evinced: Digital accessibility software
 I am the architect and lead data engineer that designed the following projects:
-- [Platform Data Pipeline](./evinced/platform_pipeline.md): A data pipeline for a scraping system that collects accessibility data for the purpose to check for accessibility compliance. The pipeline is designed to handle huge bursts of traffic and scale up and down according to traffic. The pipeline does complex data transformation to accomplish aggregated data that can be query via graphQL. The pipeline keeps up with a few million messages per minute and can scale up to meet much more for future traffic. The pipeline includes data deduplication, complex grouping of data to name a few. All of this functionality was implemented with low cloud cost.
+- [Platform Data Pipeline](./evinced/platform_pipeline.md): A data pipeline for a scraping system that collects accessibility data for the purpose to check for accessibility compliance. The pipeline is designed to handle huge bursts of traffic and scale up and down according to traffic. The pipeline does complex data transformation to accomplish aggregated data that can be query via graphQL. The pipeline keeps up with a few million messages per minute and can scale up to meet much more for future traffic.
+  - This pipeline includes [data deduplication](./evinced/platform_deduplication.md), complex grouping of data to name a few. All of this functionality was implemented with low cloud cost. 
 - Designed the new pipeline via Airflow for the company's research team to use for machine learning.
 - Researched and designed the pipeline for generative AI needs.
 
