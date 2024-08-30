@@ -6,7 +6,7 @@ Additionally, there was a need to update a large number of records, allowing use
 Moreover, query response times needed to be sub-second. 
 The expected traffic volume ranged from 1 to 5 billion records per day.
 
-# Choosing ClikHouse
+# Choosing ClickHouse
 We decided to solve the problem with clickhouse cloud after considering many othger solutions.
 Clickhouse.com offers a managed ClickHouse database with an exclusive cloud engine called ShardMergeTree, which handles sharding and scaling. Additionally, 
 it supports an idle mode where costs nearly drop to zero while keeping the service running. 
@@ -22,18 +22,28 @@ Every item can be categorized. Because the criteria for categorizing an item can
 
 ## Query Performance
 
-First, we demonstrated that ClickHouse can handle large queries on our data. I imported a massive dataset via Spark and began testing real-world queries. The results were impressive: on the traffic table, I achieved 393.65 million rows per second and 7.39 GB per second. Most queries returned in under a second, though some complex queries still took 40 seconds. To optimize these, I utilized materialized views, ensuring they stayed up to date thanks to the CollapsingMergeTree. After implementing the materialized views, I reduced the 40-second queries to just a few milliseconds.
+First, we demonstrated that ClickHouse can handle large queries on our data. I imported a massive dataset via Spark and began testing real-world queries. The results were impressive: on the traffic table, I achieved 393.65 million rows per second and 7.39 GB per second. Most queries returned in under a second, though some complex queries still took 40 seconds. To optimize these, I utilized materialized views, ensuring they stayed up to date thanks to the CollapsingMergeTree. After implementing the materialized views, we reduced the 40-second queries to just a few milliseconds.
 
 This was exciting and promising news. However, one major challenge remained: you need the full state of a record if you want to update it. If you don't have the state, you must also read from ClickHouse, which could result in numerous point queries—a significant drawback for ClickHouse. In the next section I address how this limitation was solved.
 
 ## Update Design
 
-The solution I developed was to make the updates asynchronous using an orchestrator that schedules which updates can run in parallel. Given that our product requires infrequent updates, handling these occasional requests with a scheduler was acceptable. The orchestrator would schedule a worker process that streams data from ClickHouse, applies the updates, and then streams the data back into the ingestion pipeline. This pipeline ultimately inserts two records for each updated entry: one with the original state to update the chain of materialized views reflecting the record's removal, and one with the new state.
+The solution we developed was to make the updates asynchronous using an orchestrator that schedules which updates can run in parallel. Given that our product requires infrequent updates, handling these occasional requests with a scheduler was acceptable. The orchestrator would schedule a worker process that streams data from ClickHouse, applies the updates, and then streams the data back into the ingestion pipeline. This pipeline ultimately inserts two records for each updated entry: one with the original state to update the chain of materialized views reflecting the record's removal, and one with the new state.
 
 The following diagram depicts the flow:
 ![My SVG Image](/evinced/platform_update.svg)
 
 The key aspect of this design is that it performs streaming updates rather than batch updates, significantly reducing memory requirements. The streamer service was developed using the Go native ClickHouse driver, which supports streaming with large SELECT statements. Additionally, failure recovery measures were implemented to ensure the system could recover from any failed updates. In testing, I successfully updated a billion records within minutes, thanks to the service being in the same region as the ClickHouse host. This was remarkable because it ensured that the aggregation tables were always up to date.
+
+### Deplicate Message Resililence
+The update design was designed to handle many millions of records which could take minutes. One unnegotianable requirement was that the pipeline needed to be deterministic.
+To meet this requirement the update pipeline was designed to be idempotent. To achieve this, the message produced by the streamer is a record pair, one for the removal of the current record and one for the new record. The sink then batches messages together, garenteing that a write to the database will contain both records in the pair. The write to Clishouse is done syncronizly.
+If the batch write fails, the exact batch will be retried until it succeeds before it moves on to the next batch.
+Clickhouse doesnt support transactional commits, but what it does offer is duplication block detection. That took care of the traffic table write to be idempotent.
+What was left was to ensure that the materialzed views behave the same. Clickhouse provides a lot of settings to fine tune block deduplication and one of them is deduplicate_blocks_in_dependent_materialized_views. By simply enabling this settings, we could ensure that the aggreagtion tables will not be affected by duplicate blocks. Also we ensured that all our aggreagte functions we used were deterministics.
+
+DIAGRAM
+
 
 ## Replay Ability
 As with any pipeline, it's important to have the ability to replay specific data chunks and reprocess them if needed. To address this, the raw input was saved in Parquet format, partitioned by tenant and date.
@@ -45,6 +55,9 @@ Item deduplication was added. Details can be seen on this page: [Deduplication O
 
 ## Query API Design
 To meet the requirement for a flexible API, I designed a GraphQL engine that translates queries into ClickHouse queries. All complex query logic is encapsulated within ClickHouse views, and the GraphQL layer simply reflects the view fields, providing filtering, sorting, and aggregation capabilities on those fields. This design allows us to easily create a new view whenever a new API is needed!
+
+## Optimizing Queries on the Trsffic Table
+tenants were mared as dirty
 
 ## Conclusion
 The solution chosen for this project was to use ClickHouse's CollapsingMergeTree in combination with the update streaming solution. Thanks to ClickHouse's idling capabilities and scalability, we were able to start with a very small cluster, significantly reducing startup costs compared to competitors.
