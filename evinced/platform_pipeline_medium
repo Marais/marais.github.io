@@ -1,4 +1,4 @@
-# Data Pipeline Design
+# Architecting for Scale: A Case Study in Using ClickHouse for High-Volume Data Processing and Asynchronous Updates
 This was a particularly interesting project. The requirements involved handling traffic from various sources, including a scraping service that generated massive bursts of traffic. Additionally, there was a need to update a large number of records, allowing users to categorize items into groups based on an arbitrary function of fields, as well as label certain items or records. Moreover, query response times needed to be sub-second. The expected traffic volume ranged from 1 to 5 billion records per day. The company’s cloud provider is GCP, and the solution had to be easily deployable and hosted on this GCP.
 
 ## Database Selection
