@@ -35,12 +35,26 @@ The following diagram depicts the flow:
 
 The key aspect of this design is that it performs streaming updates rather than batch updates, significantly reducing memory requirements. The streamer service was developed using the Go native ClickHouse driver, which supports streaming with large SELECT statements. Additionally, failure recovery measures were implemented to ensure the system could recover from any failed updates. In testing, I successfully updated a billion records within minutes, thanks to the service being in the same region as the ClickHouse host. This was remarkable because it ensured that the aggregation tables were always up to date.
 
-### Deplicate Message Resililence
-The update design was designed to handle many millions of records which could take minutes. One unnegotianable requirement was that the pipeline needed to be deterministic.
-To meet this requirement the update pipeline was designed to be idempotent. To achieve this, the message produced by the streamer is a record pair, one for the removal of the current record and one for the new record. The sink then batches messages together, garenteing that a write to the database will contain both records in the pair. The write to Clishouse is done syncronizly.
-If the batch write fails, the exact batch will be retried until it succeeds before it moves on to the next batch.
-Clickhouse doesnt support transactional commits, but what it does offer is duplication block detection. That took care of the traffic table write to be idempotent.
+## Deplicate Message Resililence
+One unnegotianable requirement was that the pipeline needed to be deterministic.
+To meet this requirement the update pipeline was designed to be idempotent. Well kind of...
+
+### PubSub
+We use google pubsub for the message queue between micro services. To achieve deplication resilence in the pipeline, we configured the Pubsub to have a big Ack timeout and ensure that each micro service doesn't hold a message for to much time.
+This is not a gaurentee fore eaxtly once dilivry, e.g. the service could crash to name one problem. We designed our microservices with graceful shut downs.
+
+With these prevetive measure put in place we were happy that the probibility of deplicate messages was low and this was an acceptible risk for us.
+
+### ClickHouse
+What was left is to make writes to clickhouse idempotent.
+To achieve this, the write to Clishouse is done syncronizly. Clickhouse doesnt support transactional commits, but what it does offer is duplication block detection.
+If the batch write fails, the exact batch will be retried until it succeeds before it moves on to the next batch. Clickhosue uses a blockID,  which is a hash of the data in that block/batch. This block_id is used as a unique key for the insert operation. If the same block_id is found in the deduplication log, the block is considered a duplicate and is not inserted into the table. That took care of the traffic table write to be idempotent.
 What was left was to ensure that the materialzed views behave the same. Clickhouse provides a lot of settings to fine tune block deduplication and one of them is deduplicate_blocks_in_dependent_materialized_views. By simply enabling this settings, we could ensure that the aggreagtion tables will not be affected by duplicate blocks. Also we ensured that all our aggreagte functions we used were deterministics.
+
+
+### Update
+To achieve idenpotency on the update pipline, the message produced by the streamer is a record pair, one for the removal of the current record and one for the new record. The sink then batches messages together, garenteing that a write to the database will contain both records in the pair.
+
 
 DIAGRAM
 
@@ -49,9 +63,6 @@ DIAGRAM
 As with any pipeline, it's important to have the ability to replay specific data chunks and reprocess them if needed. To address this, the raw input was saved in Parquet format, partitioned by tenant and date.
 
 ![My SVG Image](/evinced/platform_replay.svg)
-
-## Item Deduplication
-Item deduplication was added. Details can be seen on this page: [Deduplication Of Items](./platform_deduplication.md)
 
 ## Query API Design
 To meet the requirement for a flexible API, I designed a GraphQL engine that translates queries into ClickHouse queries. All complex query logic is encapsulated within ClickHouse views, and the GraphQL layer simply reflects the view fields, providing filtering, sorting, and aggregation capabilities on those fields. This design allows us to easily create a new view whenever a new API is needed!
