@@ -20,7 +20,7 @@ Every item can be categorized. Because the criteria for categorizing an item can
 
 ![My SVG Image](/evinced/platform_ingestion.svg)
 
-## Query Performance
+## Raw Query Performance
 
 First, we demonstrated that ClickHouse can handle large queries on our data. I imported a massive dataset via Spark and began testing real-world queries. The results were impressive: on the traffic table, I achieved 393.65 million rows per second and 7.39 GB per second. Most queries returned in under a second, though some complex queries still took 40 seconds. To optimize these, I utilized materialized views, ensuring they stayed up to date thanks to the CollapsingMergeTree. After implementing the materialized views, we reduced the 40-second queries to just a few milliseconds.
 
@@ -66,8 +66,15 @@ As with any pipeline, it's important to have the ability to replay specific data
 ## Query API Design
 To meet the requirement for a flexible API, I designed a GraphQL engine that translates queries into ClickHouse queries. All complex query logic is encapsulated within ClickHouse views, and the GraphQL layer simply reflects the view fields, providing filtering, sorting, and aggregation capabilities on those fields. This design allows us to easily create a new view whenever a new API is needed!
 
-## Optimizing Queries on the Trsffic Table
-tenants were mared as dirty
+### Optimizing Queries per tenant on the Traffic table
+One thing to realize about clickhouse table engine CollapsingMergeTree is that it lazily apply the colapsing in the background. This means that if you want the updated records you need to tell clickhouse in the query to apply the collapse immediatly by providing the FINAL keyword. With tests we saw a signaficant degradation of performance when we put the FINAL keyword in the queries.
+
+Remember that I said that the updates per tenant are infrequent. We used this fact to our advantage. Whenever a tenant triggered an update, we marked the tanant as dirty in the API service.
+We then went ahead and created a cron job that force the optimization on a time where we experience low amount of queries and ingestion.
+``` SQL
+OPTIMIZE TABLE my_table FINAL;
+```
+With this in place, when a tenant make a query, if the teant is not marked as dirty, we dont need to include the FINAL keyword in the query.
 
 ## Conclusion
 The solution chosen for this project was to use ClickHouse's CollapsingMergeTree in combination with the update streaming solution. Thanks to ClickHouse's idling capabilities and scalability, we were able to start with a very small cluster, significantly reducing startup costs compared to competitors.
