@@ -40,10 +40,10 @@ One unnegotianable requirement was that the pipeline needed to be deterministic.
 To meet this requirement the update pipeline was designed to be idempotent. Well kind of...
 
 ### PubSub
-We use google pubsub for the message queue between micro services. To achieve deplication resilence in the pipeline, we configured the Pubsub to have a big Ack timeout and ensure that each micro service doesn't hold a message for to much time.
-This is not a gaurentee fore eaxtly once dilivry, e.g. the service could crash to name one problem. We designed our microservices with graceful shut downs.
+We use google pubsub for the message queue between micro services. To achieve deplication resilence in the pipeline, we configured the Pubsub to have a big Ack timeout and ensure that each micro service doesn't hold a message for too much time.
+This is not a gaurentee fore eaxtly once dilivry, e.g. the service could crash to name one problem. We designed our microservices with graceful shut downs to not leave "half job" completed processing.
 
-With these prevetive measure put in place we were happy that the probibility of deplicate messages was low and this was an acceptible risk for us.
+With these preventetive measures put in place we were happy that the probibility of deplicate messages was low and this was an acceptible risk for us.
 
 ### ClickHouse
 What was left is to make writes to clickhouse idempotent.
@@ -51,9 +51,8 @@ To achieve this, the write to Clishouse is done syncronizly. Clickhouse doesnt s
 If the batch write fails, the exact batch will be retried until it succeeds before it moves on to the next batch. Clickhosue uses a blockID,  which is a hash of the data in that block/batch. This block_id is used as a unique key for the insert operation. If the same block_id is found in the deduplication log, the block is considered a duplicate and is not inserted into the table. That took care of the traffic table write to be idempotent.
 What was left was to ensure that the materialzed views behave the same. Clickhouse provides a lot of settings to fine tune block deduplication and one of them is deduplicate_blocks_in_dependent_materialized_views. By simply enabling this settings, we could ensure that the aggreagtion tables will not be affected by duplicate blocks. Also we ensured that all our aggreagte functions we used were deterministics.
 
-
 ### Update
-To achieve idenpotency on the update pipline, the message produced by the streamer is a record pair, one for the removal of the current record and one for the new record. The sink then batches messages together, garenteing that a write to the database will contain both records in the pair.
+To achieve idenpotency on the update pipline, the message produced by the streamer is a record pair, one for the removal of the current record and one for the new record. The sink then batches messages together, garenteing that a write to the database will contain both records in the pair. This removes to risk to have unbalanced record in the colpsingMergeTre, meaning that you cannot if a remove record without an insert. This alone of course doesn't make the update pipeline compeltely resilient against deduplicate message delivery, but this poses the same risk for incorrect aggregation updates via the materialized views than the ingestion pipeline. So again, this risk was accaptible for us.
 
 
 DIAGRAM
