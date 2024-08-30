@@ -1,28 +1,28 @@
-# Architecting for Scale: A Case Study in Using ClickHouse for High-Volume Data Processing and Asynchronous Updates
-This was a particularly interesting project. The requirements involved handling traffic from various sources, including a scraping service that generated massive bursts of traffic. Additionally, there was a need to update a large number of records, allowing users to categorize items into groups based on an arbitrary function of fields, as well as label certain items or records. Moreover, query response times needed to be sub-second. The expected traffic volume ranged from 1 to 5 billion records per day. The company’s cloud provider is GCP, and the solution had to be easily deployable and hosted on this GCP.
+# Architecting for Scale: A Case Study in Using ClickHouse for High-Volume Data Pipeline Processing and Asynchronous Updates
+At Evinced, a company that focus on accessiblity complaince on enterprise clients, we have tools that produce a huge amount of traffic send to our SaaS platform. 
+This data is used to do smart categorization through various techniques includding machine learning models.
+We developed a pipeline where the requirements involved handling traffic from various sources, including a scraping and scanning service that generated massive bursts of traffic. 
+Additionally, there was a need to update a large number of records, allowing users to categorize items into groups based on an arbitrary function of fields, as well as label certain items or records.
+Moreover, query response times needed to be sub-second. 
+The expected traffic volume ranged from 1 to 5 billion records per day.
 
-## Database Selection
-In order solve this, I had to make an extensive research on Database technology. 
-The following databases were shortlist from a huge list:
-- Apache Pinot with their star tree index
-- Clickhouse cloud
-- Rockset
-- Apache Druid
-- Firebolt
-
-After further refining my options based on various criteria, I decided to conduct two proof-of-concepts (POCs) to compare Apache Pinot and ClickHouse:
-
-- Apache Pinot: What stands out about this technology is its unique index called the StarTree index, which is essentially a much leaner OLAP cube inspired by Iceberg design concepts. However, it doesn't support updates, as the index can only be based on immutable facts. Although Pinot has strong update capabilities, this requires the index to be kept entirely in memory. While there's an option to store part of the index on disk, this approach seemed inelegant in design. Moreover, we couldn't utilize the StarTree index, which diminished its appeal for this project.
-- ClickHouse Cloud: Clickhouse.com offers a managed ClickHouse database with an exclusive cloud engine called ShardMergeTree, which handles sharding and scaling. Additionally, it supports an idle mode where costs nearly drop to zero while keeping the service running. ClickHouse also features an engine called CollapsingMergeTree, which appears ideal for the company's update needs. This engine allows real-time materialized views on your traffic/fact tables. However, to maintain the accuracy of materialized views, you must provide the full state of the record you want to update so ClickHouse can correctly adjust the aggregated data. Given this significant constraint, I decided to explore whether I could overcome this limitation ehich I described in the Update Design section.
+# Choosing ClikHouse
+We decided to solve the problem with clickhouse cloud after considering many othger solutions.
+Clickhouse.com offers a managed ClickHouse database with an exclusive cloud engine called ShardMergeTree, which handles sharding and scaling. Additionally, 
+it supports an idle mode where costs nearly drop to zero while keeping the service running. 
+ClickHouse also features an engine called CollapsingMergeTree, which appears ideal for the company's update needs. 
+This engine allows real-time materialized views on your traffic/fact tables. However, to maintain the accuracy of materialized views, 
+you must provide the full state of the record you want to update so ClickHouse can correctly adjust the aggregated data. 
+Given this significant constraint, we decided to explore whether we could overcome this limitation which is described in the Update Design section.
 
 ## Ingestion Design
-Every item can be categorized. Because the criteria for categorizing an item can be very complex and expensive to solve on a query, I decided to solve this in the ingestion phase.
+Every item can be categorized. Because the criteria for categorizing an item can be very complex and expensive to solve on a query, we decided to solve this in the ingestion phase.
 
 ![My SVG Image](/evinced/platform_ingestion.svg)
 
 ## Query Performance
 
-First, I demonstrated that ClickHouse can handle large queries on our data. I imported a massive dataset via Spark and began testing real-world queries. The results were impressive: on the traffic table, I achieved 393.65 million rows per second and 7.39 GB per second. Most queries returned in under a second, though some complex queries still took 40 seconds. To optimize these, I utilized materialized views, ensuring they stayed up to date thanks to the CollapsingMergeTree. After implementing the materialized views, I reduced the 40-second queries to just a few milliseconds.
+First, we demonstrated that ClickHouse can handle large queries on our data. I imported a massive dataset via Spark and began testing real-world queries. The results were impressive: on the traffic table, I achieved 393.65 million rows per second and 7.39 GB per second. Most queries returned in under a second, though some complex queries still took 40 seconds. To optimize these, I utilized materialized views, ensuring they stayed up to date thanks to the CollapsingMergeTree. After implementing the materialized views, I reduced the 40-second queries to just a few milliseconds.
 
 This was exciting and promising news. However, one major challenge remained: you need the full state of a record if you want to update it. If you don't have the state, you must also read from ClickHouse, which could result in numerous point queries—a significant drawback for ClickHouse. In the next section I address how this limitation was solved.
 
