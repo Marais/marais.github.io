@@ -64,7 +64,7 @@ As with any pipeline, it's important to have the ability to replay specific data
 ![My SVG Image](/evinced/platform_replay.svg)
 
 ## Query API Design
-To meet the requirement for a flexible API, I designed a GraphQL engine that translates queries into ClickHouse queries. All complex query logic is encapsulated within ClickHouse views, and the GraphQL layer simply reflects the view fields, providing filtering, sorting, and aggregation capabilities on those fields. This design allows us to easily create a new view whenever a new API is needed!
+To meet the requirement for a flexible API, a GraphQL engine was designed that translates GQL into ClickHouse queries. All complex query logic is encapsulated within ClickHouse views, and the GraphQL layer simply reflects the view fields, providing filtering, sorting, and aggregation capabilities on those fields. This design allows us to easily create a new view which will automatically be add to the API. The meta data can be trieved easily with a GraphQL introspectin query.
 
 ### Optimizing Queries per tenant on the Traffic table
 One thing to realize about clickhouse table engine CollapsingMergeTree is that it lazily apply the colapsing in the background. This means that if you want the updated records you need to tell clickhouse in the query to apply the collapse immediatly by providing the FINAL keyword. With tests we saw a signaficant degradation of performance when we put the FINAL keyword in the queries.
