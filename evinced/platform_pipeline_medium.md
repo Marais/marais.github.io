@@ -65,6 +65,7 @@ To leverage this feaure of clickhouse, I designed the sink so that if the batch 
 ### Update
 To achieve idenpotency on the update pipline, the message produced by the streamer is a record pair, one for the removal of the current record and one for the new record. The sink then batches messages together, garenteing that a write to the database will contain both records in the pair. This removes to risk to have unbalanced record in the colpsingMergeTre, meaning that you cannot if a remove record without an insert. This alone of course doesn't make the update pipeline compeltely resilient against deduplicate message delivery, but this poses the same risk for incorrect aggregation updates via the materialized views with the ingestion pipeline. So again, this risk was accaptible for us.
 
+On top of this, the select statement was enforced to have a upper ingestion timestamp in the where clause. This kept the amount of  records streamed deterministic, which meant we could predict how many records will be updated and if the update failed, it could be retried.
 
 DIAGRAM
 
