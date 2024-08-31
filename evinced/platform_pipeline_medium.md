@@ -9,11 +9,14 @@ The expected traffic volume ranged from 1 to 5 billion records per day.
 # Choosing ClickHouse
 We decided to solve the problem with clickhouse cloud after considering many othger solutions.
 Clickhouse.com offers a managed ClickHouse database with an exclusive cloud engine called ShardMergeTree, which handles sharding and scaling. Additionally, 
-it supports an idle mode where costs nearly drop to zero while keeping the service running. 
+it supports an idle mode where costs nearly drop to zero while keeping the service running.
+## Choosing the Engine
+Clickhouse has a rich selexction of MergeTree family engines. One requirement for us was to support updates. The regular MergeTree does indeed support updates, deletes and lightweight deletes that can handle deletes and updes with better performance. Something that must be understood here is that with deletes and updates, changes are not triggered downstream on the materialized views. Clickhouse does support projections with update and delete with the lightweight_mutation_projection_mode setting. 
+We explored this option, but we had complex queries which required the use of materialized views and felt that lthe ightweight mutation feature with projections is not mature enough and does not give you the power that  materialzied views do.
 ClickHouse also features an engine called CollapsingMergeTree, which appears ideal for the company's update needs. 
 This engine allows real-time materialized views on your traffic/fact tables. However, to maintain the accuracy of materialized views, 
 you must provide the full state of the record you want to update so ClickHouse can correctly adjust the aggregated data. 
-Given this significant constraint, we decided to explore whether we could overcome this limitation which is described in the Update Design section.
+Given this constraint, but with the big advantage of materialized views, we decided to explore whether we could overcome this limitation. In the Update Design section I describe how we solved this.
 
 ## Ingestion Design
 Every item can be categorized. Because the criteria for categorizing an item can be very complex and expensive to solve on a query, we decided to solve this in the ingestion phase.
