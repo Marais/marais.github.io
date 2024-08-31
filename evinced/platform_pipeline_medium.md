@@ -36,7 +36,11 @@ The solution we developed was to make the updates asynchronous using an orchestr
 The following diagram depicts the flow:
 ![My SVG Image](/evinced/platform_update.svg)
 
-The key aspect of this design is that it performs streaming updates rather than batch updates, significantly reducing memory requirements. The streamer service was developed using the Go native ClickHouse driver, which supports streaming with large SELECT statements. Additionally, failure recovery measures were implemented to ensure the system could recover from any failed updates. In testing, I successfully updated a billion records within minutes, thanks to the service being in the same region as the ClickHouse host. This was remarkable because it ensured that the aggregation tables were always up to date with the traffic table.
+The key aspect of this design is that it performs streaming updates rather than batch updates, significantly reducing memory requirements. The streamer service was developed using the Go native ClickHouse driver, which supports streaming with large SELECT statements. 
+
+Because the order of messages in our update pipeline could not be garenteed, we chose th VersionedCollapsingMergeTree over the CollapsingMergeTree. This ensure the the correct record will be matched regardless of the order of messages.
+
+Additionally, failure recovery measures were implemented to ensure the system could recover from any failed updates. In testing, I successfully updated a billion records within minutes, thanks to the service being in the same region as the ClickHouse host. This was remarkable because it ensured that the aggregation tables were always up to date with the traffic table.
 
 ## Deplicate Message Resililence
 One requirement was that the pipeline needed to be deterministic.
