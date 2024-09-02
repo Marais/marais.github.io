@@ -69,17 +69,16 @@ As with any pipeline, it's important to have the ability to replay specific data
 ![My SVG Image](/evinced/platform_replay.svg)
 
 ## Query API Design
-To meet the requirement for a flexible API, a GraphQL engine was designed that translates GQL into ClickHouse queries. All complex query logic is encapsulated within ClickHouse views, and the GraphQL layer simply reflects the view fields, providing filtering, sorting, and aggregation capabilities on those fields. This design allows us to easily create a new view which will automatically be add to the API. The meta data can be trieved easily with a GraphQL introspectin query.
+To meet the requirement for a flexible API, we designed a GraphQL engine that translates GQL into ClickHouse queries. All complex query logic is encapsulated within ClickHouse views, while the GraphQL layer simply reflects the view fields, offering filtering, sorting, and aggregation capabilities on those fields. This design enables us to easily create a new view that is automatically added to the API. Metadata can be easily retrieved using a GraphQL introspection query.
 
-### Optimizing Queries per tenant on the Traffic table
-One thing to realize about clickhouse table engine CollapsingMergeTree is that it lazily apply the colapsing in the background. This means that if you want the updated records you need to tell clickhouse in the query to apply the collapse immediatly by providing the FINAL keyword. With tests we saw a signaficant degradation of performance when we put the FINAL keyword in the queries.
+### Optimizing Tenant-Specific Queries on the Traffic Table
+One important aspect to understand about ClickHouse's CollapsingMergeTree table engine is that it applies collapsing lazily in the background. This means that if you need to retrieve the updated records immediately, you must instruct ClickHouse to apply the collapse by using the FINAL keyword in your query. However, in our tests, we observed a significant performance degradation when including the FINAL keyword in queries.
 
-Remember that I said that the updates per tenant are infrequent. We used this fact to our advantage. Whenever a tenant triggered an update, we marked the tanant as dirty in the API service.
-We then went ahead and created a cron job that force the optimization on a time where we experience low amount of queries and ingestion.
+Given that updates per tenant are infrequent, we leveraged this fact to our advantage. Whenever a tenant triggers an update, we mark the tenant as "dirty" in the API service. We then set up a cron job to force optimization during periods of low query and ingestion activity:
 ``` SQL
 OPTIMIZE TABLE my_table FINAL;
 ```
-With this in place, when a tenant make a query, if the teant is not marked as dirty, we dont need to include the FINAL keyword in the query.
+With this in place, when a tenant makes a query and is not marked as "dirty," we can omit the FINAL keyword from the query. This approach helps maintain performance while ensuring that only necessary queries undergo the collapsing process.
 
 ## Conclusion
 The solution chosen for this project was to use ClickHouse's CollapsingMergeTree in combination with the update streaming solution. Thanks to ClickHouse's idling capabilities and scalability, we were able to start with a very small cluster, significantly reducing startup costs compared to competitors.
