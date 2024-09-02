@@ -47,14 +47,13 @@ We use Google Pub/Sub as the message queue between our microservices. To achieve
 With these preventive measures in place, we were confident that the probability of duplicate messages was low, and we considered this an acceptable risk.
 
 ### ClickHouse
-What was left is to make writes to clickhouse idempotent.
-To achieve this, the write to Clishouse was done syncronizly. Clickhouse doesnt support transactional commits becasue it is an OLAP db, but what it does offer is duplication block detection.
-Clickhosue uses a blockID,  which is a hash of the data in that block/batch. This block_id is used as a unique key for the insert operation. If the same block_id is found in the deduplication log, the block is considered a duplicate and is not inserted into the table. 
-That took care of the traffic table write to be idempotent.
+The remaining task was to make writes to ClickHouse idempotent. To achieve this, writes to ClickHouse were done synchronously. ClickHouse, being an OLAP database, does not support transactional commits, but it does offer duplication block detection.
 
-What was left was to ensure that the materialzed views behave the same. Clickhouse provides a lot of settings to fine tune block deduplication and one of them is deduplicate_blocks_in_dependent_materialized_views. By simply enabling this settings, we could ensure that the aggreagtion tables will not be affected by duplicate blocks. 
+ClickHouse uses a block ID, which is a hash of the data in a block or batch. This block ID acts as a unique key for the insert operation. If the same block ID is found in the deduplication log, the block is considered a duplicate and is not inserted into the table. This approach made the traffic table write idempotent.
 
-To leverage this feaure of clickhouse, I designed the sink so that if the batch write fails, the exact batch will be retried until it succeeds before it moves on to the next batch. This ensured that the same block_id will be generated and a duplicate block will be discarded by clickhouse. Also we ensured that all our aggreagte functions we used were deterministics.
+The next step was to ensure that the materialized views behaved similarly. ClickHouse provides several settings to fine-tune block deduplication, and one of them is deduplicate_blocks_in_dependent_materialized_views. By enabling this setting, we ensured that the aggregation tables would not be affected by duplicate blocks.
+
+To leverage this feature of ClickHouse, we designed the sink so that if a batch write fails, the exact batch is retried until it succeeds before moving on to the next batch. This guarantees that the same block ID will be generated, and any duplicate block will be discarded by ClickHouse. Additionally, we ensured that all the aggregate functions we used were deterministic.
 
 ### Update
 To achieve idenpotency on the update pipline, the message produced by the streamer is a record pair, one for the removal of the current record and one for the new record. The sink then batches messages together, garenteing that a write to the database will contain both records in the pair. This removes to risk to have unbalanced record in the colpsingMergeTre, meaning that you cannot if a remove record without an insert. This alone of course doesn't make the update pipeline compeltely resilient against deduplicate message delivery, but this poses the same risk for incorrect aggregation updates via the materialized views with the ingestion pipeline. So again, this risk was accaptible for us.
