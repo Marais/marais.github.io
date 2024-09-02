@@ -1,15 +1,12 @@
 # Architecting for Scale: A Case Study in Using ClickHouse for High-Volume Data Pipeline Processing and Asynchronous Updates
-At Evinced, a company that focus on accessiblity complaince on enterprise clients, we have tools that produce a huge amount of traffic send to our SaaS platform. 
-This data is used to do smart categorization through various techniques includding machine learning models.
-We developed a pipeline where the requirements involved handling traffic from various sources, including a scraping and scanning service that generated massive bursts of traffic. 
-Additionally, there was a need to update a large number of records, allowing users to categorize items into groups based on an arbitrary function of fields, as well as label certain items or records.
-Moreover, query response times needed to be sub-second. 
-The expected traffic volume ranged from 1 to 5 billion records per day.
+At Evinced, a company focused on accessibility compliance for enterprise clients, we manage tools that generate a significant amount of traffic to our SaaS platform. This data is leveraged for smart categorization and accessibility issue detection using various techniques, including machine learning models.
+
+We developed a pipeline designed to handle traffic from multiple sources, such as a scraping and scanning service that produced massive bursts of traffic. Additionally, the pipeline needed to accommodate the updating of a large number of records, enabling users to categorize items into groups based on custom functions of fields and to label specific items or records. Furthermore, query response times were required to be sub-second.
 
 # Choosing ClickHouse
-We decided to solve the problem with clickhouse cloud after considering many othger solutions.
-Clickhouse.com offers a managed ClickHouse database with an exclusive cloud engine called ShardMergeTree, which handles sharding and scaling. Additionally, 
-it supports an idle mode where costs nearly drop to zero while keeping the service running.
+After considering several alternatives such as Apache Pinot, Rockset, Apache Druid, and Firebolt, we ultimately decided to go with ClickHouse Cloud. While each of these databases has its own advantages, this article focuses on why we chose ClickHouse and how it met our specific requirements at a minimal cost compared to other solutions.
+
+ClickHouse.com offers a managed ClickHouse database with a unique cloud engine called SharedMergeTree, which simplifies sharding and scaling far more than managing your own ClickHouse cluster. Additionally, it supports an idle mode that significantly reduces costs while keeping the service operational. ClickHouse also provides a rich set of engines, which leads us to the next section.
 ## Choosing the Engine
 Clickhouse has a rich selexction of MergeTree family engines. One requirement for us was to support updates. The regular MergeTree does indeed support updates, deletes and lightweight deletes that can handle deletes and updes with better performance. Something that must be understood here is that with deletes and updates, changes are not triggered downstream on the materialized views. Clickhouse does support projections with update and delete with the lightweight_mutation_projection_mode setting. 
 We explored this option, but we had complex queries which required the use of materialized views and although the updates were infrequent, it will still be signaficantly big updates which will degragate the performance.
