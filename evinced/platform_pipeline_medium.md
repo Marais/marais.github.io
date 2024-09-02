@@ -23,30 +23,28 @@ As I mentioned earlier, we performed categorization based on a function of the r
 
 First, we demonstrated that ClickHouse can handle large queries on our data. I imported a massive dataset via Spark and began testing real-world queries. The results were impressive: on the traffic table, I achieved 393.65 million rows per second and 7.39 GB per second. Most queries returned in under a second, though some complex queries still took 40 seconds. To optimize these, I utilized materialized views, ensuring they stayed up to date thanks to the CollapsingMergeTree. After implementing the materialized views, we reduced the 40-second queries to just a few milliseconds.
 
-This was exciting and promising news. However, one major challenge remained: you need the full state of a record if you want to update it. If you don't have the state, you must also read from ClickHouse, which could result in numerous point queries—a significant drawback for ClickHouse. In the next section I address how this limitation was solved.
+This was exciting and promising news. However, one major challenge remained: you need the full state of a record if you want to update it. If you don't have the state, you must also read from ClickHouse, which will result in numerous point queries. In the next section I address how this limitation was solved.
 
 ## Update Design
 
-The solution we developed was to make the updates asynchronous using an orchestrator that schedules which updates can run in parallel. Given that our product requires infrequent updates, handling these occasional requests with a scheduler was acceptable. The orchestrator would schedule a worker process that streams data from ClickHouse, applies the updates, and then streams the data back into the ingestion pipeline. This pipeline ultimately inserts two records for each updated entry: one with the original state to update the chain of materialized views reflecting the record's removal, and one with the new state.
+We decided to experiment with the idea of using the same pipeline as the ingestion for updates as well. The solution we developed was to make the updates asynchronous using an orchestrator that schedules which updates can run in parallel. Given that our product requires infrequent updates, handling these occasional requests with a scheduler was acceptable. The orchestrator would schedule a worker process that streams data from ClickHouse, applies the updates, and then streams the data back into the ingestion pipeline. This pipeline ultimately inserts two records for each updated entry: one with the original state to update the chain of materialized views reflecting the record's removal, and one with the new state.
 
 The following diagram depicts the flow:
 ![My SVG Image](/evinced/platform_update.svg)
 
-The key aspect of this design is that it performs streaming updates rather than batch updates, significantly reducing memory requirements. The streamer service was developed using the Go native ClickHouse driver, which supports streaming with large SELECT statements. 
+The key aspect of this design is its ability to perform streaming updates instead of batch updates. This approach allows throughput throttling and significantly reduces memory requirements. The streamer service was developed using the Go native ClickHouse driver, which supports streaming with large SELECT statements. 
 
-Because the order of messages in our update pipeline could not be garenteed, we chose th VersionedCollapsingMergeTree over the CollapsingMergeTree. This ensure the the correct record will be matched regardless of the order of messages.
+Because the order of messages in our update pipeline could not be guaranteed, we chose the VersionedCollapsingMergeTree over the CollapsingMergeTree. This choice ensures that the correct record is matched regardless of the order in which the messages arrive.
 
-Additionally, failure recovery measures were implemented to ensure the system could recover from any failed updates. In testing, I successfully updated a billion records within minutes, thanks to the service being in the same region as the ClickHouse host. This was remarkable because it ensured that the aggregation tables were always up to date with the traffic table.
+Additionally, failure recovery measures were implemented to ensure the system could recover from any failed updates. In testing, I successfully updated a billion records within minutes, thanks to the service being in the same region as the ClickHouse host. This was remarkable performance.
 
-## Deplicate Message Resililence
-One requirement was that the pipeline needed to be deterministic.
-To meet this requirement the update pipeline was designed to be idempotent. Well kind of...
+## Duplicate Message Resilience
+One of the requirements was for the pipeline to be deterministic. To achieve this, the update pipeline was designed to be idempotent—well, sort of...
 
 ### PubSub
-We use google pubsub for the message queue between micro services. To achieve deplication resilence in the pipeline, we configured the Pubsub to have a big Ack timeout and ensure that each micro service doesn't hold a message for too much time.
-This is not a gaurentee for exactly once delivery, e.g. the service could crash or be killed to name one problem. We designed our microservices with graceful shut downs to not leave "half job" completed processing.
+We use Google Pub/Sub as the message queue between our microservices. To achieve resilience against duplication in the pipeline, we configured Pub/Sub with a long acknowledgment timeout. We also ensured that each microservice doesn't hold onto a message for too long. However, this does not guarantee exactly-once delivery; for example, a service could crash or be terminated unexpectedly. To mitigate expecetd service termination, we designed our microservices with graceful shutdowns to avoid leaving tasks partially completed.
 
-With these preventetive measures put in place we were happy that the probibility of deplicate messages was low and this was an acceptible risk for us.
+With these preventive measures in place, we were confident that the probability of duplicate messages was low, and we considered this an acceptable risk.
 
 ### ClickHouse
 What was left is to make writes to clickhouse idempotent.
