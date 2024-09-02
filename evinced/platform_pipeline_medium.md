@@ -8,12 +8,11 @@ After considering several alternatives such as Apache Pinot, Rockset, Apache Dru
 
 ClickHouse.com offers a managed ClickHouse database with a unique cloud engine called SharedMergeTree, which simplifies sharding and scaling far more than managing your own ClickHouse cluster. Additionally, it supports an idle mode that significantly reduces costs while keeping the service operational. ClickHouse also provides a rich set of engines, which leads us to the next section.
 ## Choosing the Engine
-Clickhouse has a rich selexction of MergeTree family engines. One requirement for us was to support updates. The regular MergeTree does indeed support updates, deletes and lightweight deletes that can handle deletes and updes with better performance. Something that must be understood here is that with deletes and updates, changes are not triggered downstream on the materialized views. Clickhouse does support projections with update and delete with the lightweight_mutation_projection_mode setting. 
-We explored this option, but we had complex queries which required the use of materialized views and although the updates were infrequent, it will still be signaficantly big updates which will degragate the performance.
-ClickHouse also features an engine called CollapsingMergeTree whcih can handle huge update/delete traffic.
-This engine allows real-time materialized views on your traffic/fact tables. However, to maintain the accuracy of materialized views, 
-you must provide the full state of the record you want to update so ClickHouse can correctly adjust the aggregated data. 
-Given this constraint, but with the big advantages mentioned, I decided to explore whether we could overcome this limitation. In the Update Design section I describe how we solved this.
+As I mentioned earlier, ClickHouse offers a wide range of engines within the MergeTree family. Our next task was to determine which engine best suited our needs. One of our key requirements was to support updates. The standard MergeTree engine does support updates, deletes, and lightweight deletes, which offer better performance for delete operations. However, it’s important to understand that updates and deletes do not automatically trigger changes downstream in materialized views. ClickHouse does offer projections that support updates and deletes with the lightweight_mutation_projection_mode setting.
+
+We explored this option, but our complex queries required the use of materialized views. Although updates were infrequent, they were still significantly large, which would degrade performance. ClickHouse also features an engine called CollapsingMergeTree, which can handle large volumes of update/delete traffic.
+
+This engine allows for real-time materialized views on your traffic or fact tables. However, to maintain the accuracy of materialized views, you must provide the full state of the record you wish to update so that ClickHouse can correctly adjust the aggregated data. Despite this limitation, the significant advantages of this engine prompted me to explore whether we could overcome this constraint. In the "Update Design" section later in this article, I explain how we successfully addressed this challenge.
 
 ## Ingestion Design
 Every item can be categorized. Because the criteria for categorizing an item can be very complex and expensive to solve on a query, we decided to solve this in the ingestion phase.
