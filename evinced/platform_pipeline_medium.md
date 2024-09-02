@@ -60,8 +60,7 @@ To avoid having unbalanced record pairs in the VersionedCollapsingMergeTree tabl
 
 Additionally, the SELECT statement was enforced to include an upper ingestion timestamp in the WHERE clause. This kept the number of records streamed deterministic, allowing us to predict how many records would be updated. If the update failed, it could be retried.
 
-DIAGRAM
-
+![My SVG Image](/evinced/platform_update_with_pairs.svg)
 
 ## Replay Ability
 As with any pipeline, it's important to have the ability to replay specific data chunks and reprocess them if needed. To address this, the raw input was saved in Parquet format, partitioned by tenant and date.
