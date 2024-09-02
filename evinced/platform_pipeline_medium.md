@@ -15,7 +15,7 @@ We explored this option, but our complex queries required the use of materialize
 This engine allows for real-time materialized views on your traffic or fact tables. However, to maintain the accuracy of materialized views, you must provide the full state of the record you wish to update so that ClickHouse can correctly adjust the aggregated data. Despite this limitation, the significant advantages of this engine prompted me to explore whether we could overcome this constraint. In the "Update Design" section later in this article, I explain how we successfully addressed this challenge.
 
 ## Ingestion Design
-Every item can be categorized. Because the criteria for categorizing an item can be very complex and expensive to solve on a query, we decided to solve this in the ingestion phase.
+As I mentioned earlier, we performed categorization based on a function of the record fields. Since the criteria for categorizing an item can be very complex and computationally expensive to solve during a query, we decided to handle this during the ingestion phase. The following diagram illustrates the ingestion pipeline.
 
 ![My SVG Image](/evinced/platform_ingestion.svg)
 
