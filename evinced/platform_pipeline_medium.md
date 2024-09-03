@@ -1,5 +1,7 @@
 # Architecting for Scale: 
 ## A Case Study in Using ClickHouse for High-Volume Data Pipeline Processing and Asynchronous Updates
+This article is also published on https://medium.com/@marais.kruger/architecting-for-scale-e998fc0adef0
+
 At Evinced, a company focused on accessibility compliance for enterprise clients, we manage tools that generate a significant amount of traffic to our SaaS platform. This data is leveraged for smart categorization and accessibility issue detection using various techniques, including machine learning models.
 
 We developed a pipeline designed to handle traffic from multiple sources, such as a scraping and scanning service that produced massive bursts of traffic. Additionally, the pipeline needed to accommodate the updating of a large number of records, enabling users to categorize items into groups based on custom functions of fields and to label specific items or records. Furthermore, query response times were required to be sub-second.
