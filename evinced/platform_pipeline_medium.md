@@ -30,7 +30,7 @@ This was exciting and promising news. However, one major challenge remained: you
 We decided to experiment with the idea of using the same pipeline as the ingestion for updates as well. The solution we developed was to make the updates asynchronous using an orchestrator that schedules which updates can run in parallel. Given that our product requires infrequent updates, handling these occasional requests with a scheduler was acceptable. The orchestrator would schedule a worker process that streams data from ClickHouse, applies the updates, and then streams the data back into the ingestion pipeline. This pipeline ultimately inserts two records for each updated entry: one with the original state to update the chain of materialized views reflecting the record's removal, and one with the new state.
 
 The following diagram depicts the flow:
-![My SVG Image](/evinced/platform_update.svg)
+![My SVG Image](/evinced/platform_update_with_pairs.svg)
 
 The key aspect of this design is its ability to perform streaming updates instead of batch updates. This approach allows throughput throttling and significantly reduces memory requirements. The streamer service was developed using the Go native ClickHouse driver, which supports streaming with large SELECT statements. 
 
@@ -59,8 +59,6 @@ To leverage this feature of ClickHouse, we designed the sink so that if a batch 
 To avoid having unbalanced record pairs in the VersionedCollapsingMergeTree table, the streamer produces a record pair for each update: one for the removal of the current record and one for the new record. The sink then batches these messages together, ensuring that a write to the database contains both records for remove and add. This approach eliminates the risk of having unbalanced records in the VersionedCollapsingMergeTree, meaning you cannot have a removal record without a corresponding insert. While this doesn't make the update pipeline completely resilient against deduplicate message delivery, it still has the risk associated with incorrect aggregation updates via the materialized views. This risk was deemed acceptable for us since the same risk was present in the regular ingestion pipeline.
 
 Additionally, the SELECT statement was enforced to include an upper ingestion timestamp in the WHERE clause. This kept the number of records streamed deterministic, allowing us to predict how many records would be updated. If the update failed, it could be retried.
-
-![My SVG Image](/evinced/platform_update_with_pairs.svg)
 
 ## Replay Ability
 As with any pipeline, it's important to have the ability to replay specific data chunks and reprocess them if needed. To address this, the raw input was saved in Parquet format, partitioned by tenant and date.
