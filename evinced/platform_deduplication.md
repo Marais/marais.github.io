@@ -61,5 +61,5 @@ The following daigram depicts this process:
 - Casandra, AeroSpike or any other distributed KVDB: Was an overkill for our needs and more expensive
 - SpeedDb: RocksDB compatible, but requires more memory. Is meant for very low latency requirements
 
-Back To [Evinced Pipeline](./platform_pipeline.md)  
+Back To [Evinced Pipeline](./platform_pipeline_medium.md)  
 Back To [Home](../index.md)
