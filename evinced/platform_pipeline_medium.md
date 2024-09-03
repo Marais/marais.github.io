@@ -1,6 +1,6 @@
 # Architecting for Scale: 
 ## A Case Study in Using ClickHouse for High-Volume Data Pipeline Processing and Asynchronous Updates
-This article is also published on https://medium.com/@marais.kruger/architecting-for-scale-e998fc0adef0
+This article was also published on [medium.com](https://medium.com/@marais.kruger/architecting-for-scale-e998fc0adef0) 
 
 At Evinced, a company focused on accessibility compliance for enterprise clients, we manage tools that generate a significant amount of traffic to our SaaS platform. This data is leveraged for smart categorization and accessibility issue detection using various techniques, including machine learning models.
 
