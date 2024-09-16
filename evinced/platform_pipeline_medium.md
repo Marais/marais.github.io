@@ -4,18 +4,24 @@ This article was also published on [medium.com](https://medium.com/@marais.kruge
 
 At Evinced, a company focused on accessibility compliance for enterprise clients, we manage tools that generate a significant amount of traffic to our SaaS platform. This data is leveraged for smart categorization and accessibility issue detection using various techniques, including machine learning models.
 
-We developed a pipeline designed to handle traffic from multiple sources, such as a scraping and scanning service that produced massive bursts of traffic. Additionally, the pipeline needed to accommodate the updating of a large number of records, enabling users to categorize items into groups based on custom functions of fields and to label specific items or records. Furthermore, query response times were required to be sub-second.
+We developed a pipeline designed to handle traffic from multiple sources, such as a scraping and scanning service that produced massive bursts of traffic. 
+
+The following requirements had to be addressed:
+- Handle huge ingress of data
+- Need the ability to update of a large number of records
+- Query response times needs to be sub-second
+- Categorize items into groups based on custom functions
 
 # Choosing ClickHouse
 After considering several alternatives such as Apache Pinot, Rockset, Apache Druid, and Firebolt, we ultimately decided to go with ClickHouse Cloud. While each of these databases has its own advantages, this article focuses on why we chose ClickHouse and how it met our specific requirements at a minimal cost compared to other solutions.
 
 ClickHouse.com offers a managed ClickHouse database with a unique cloud engine called SharedMergeTree, which simplifies sharding and scaling far more than managing your own ClickHouse cluster. Additionally, it supports an idle mode that significantly reduces costs while keeping the service operational. ClickHouse also provides a rich set of engines, which leads us to the next section.
 ## Choosing the Engine
-As I mentioned earlier, ClickHouse offers a wide range of engines within the MergeTree family. Our next task was to determine which engine best suited our needs. One of our key requirements was to support updates. The standard MergeTree engine does support updates, deletes, and lightweight deletes, which offer better performance for delete operations. However, it’s important to understand that updates and deletes do not automatically trigger changes downstream in materialized views. ClickHouse does offer projections that support updates and deletes with the lightweight_mutation_projection_mode setting.
+As I mentioned earlier, ClickHouse offers a wide range of engines within the MergeTree family. Our next task was to determine which engine best suited our needs. One of our key requirements was to support updates. 
 
-We explored this option, but our complex queries required the use of materialized views. Although updates were infrequent, they were still significantly large, which would degrade performance. ClickHouse also features an engine called CollapsingMergeTree, which can handle large volumes of update/delete traffic.
+The standard MergeTree engine does indeed support updates, deletes, and lightweight deletes, which offer better performance for delete operations. However, it’s important to understand that updates and deletes do not automatically trigger changes downstream in materialized views. ClickHouse does offer projections that support updates and deletes with the lightweight_mutation_projection_mode setting. We explored this option, but our complex queries required the use of materialized views. Although updates were infrequent, they were still significantly large, which would degrade performance. 
 
-This engine allows for real-time materialized views on your traffic or fact tables. However, to maintain the accuracy of materialized views, you must provide the full state of the record you wish to update so that ClickHouse can correctly adjust the aggregated data. Despite this limitation, the significant advantages of this engine prompted me to explore whether we could overcome this constraint. In the "Update Design" section later in this article, I explain how we successfully addressed this challenge.
+ClickHouse also features an engine called CollapsingMergeTree, which can handle large volumes of update/delete traffic. This engine allows for real-time materialized views on your traffic or fact tables. However, to maintain the accuracy of materialized views, you must provide the full state of the record you wish to update so that ClickHouse can correctly adjust the aggregated data. Despite this limitation, the significant advantages of this engine prompted me to explore whether we could overcome this constraint. In the "Update Design" section later in this article, I explain how we successfully addressed this challenge.
 
 # Ingestion Design
 As I mentioned earlier, we performed categorization based on a function of the record fields. Since the criteria for categorizing an item can be very complex and computationally expensive to solve during a query, we decided to handle this during the ingestion phase. The following diagram illustrates the ingestion pipeline.
