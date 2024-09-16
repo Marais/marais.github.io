@@ -6,10 +6,10 @@ At Evinced, a company focused on accessibility compliance for enterprise clients
 
 We developed a pipeline designed to handle traffic from multiple sources, such as a scraping and scanning service that produced massive bursts of traffic. 
 
-The following requirements had to be addressed:
-- Handle huge ingress of data
+The following requirements needed to be addressed:
+- Handle a large volume of incoming data
 - Need the ability to update of a large number of records
-- Query response times needs to be sub-second
+- Ensure query response times are sub-second
 - Categorize items into groups based on custom functions
 
 # Choosing ClickHouse
